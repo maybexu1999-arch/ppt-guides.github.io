@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>PPT制作保姆级教程 — 打印为PDF</title>
+<style>
+  :root {
+    --green:      #2d6a4f;
+    --greenL:     #52b788;
+    --greenPale:  #d8f3dc;
+    --dark:       #1a1a2e;
+    --orange:     #f4a261;
+    --blue:       #457b9d;
+    --blueL:      #a8dadc;
+    --red:        #e63946;
+    --yellow:     #ffd166;
+    --white:      #ffffff;
+    --gray:       #6b7280;
+    --grayL:      #f3f4f6;
+    --grayM:      #e5e7eb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "SimHei", sans-serif;
+    background: #ccc;
+    color: var(--dark);
+  }
+
+  /* ── Print button (hidden in print) ── */
+  .print-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    background: var(--dark); color: white;
+    padding: 10px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 14px;
+  }
+  .print-btn {
+    background: var(--green); color: white;
+    border: none; border-radius: 8px;
+    padding: 8px 24px; font-size: 14px; font-weight: 700;
+    cursor: pointer;
+  }
+  .print-hint { font-size: 12px; color: #aaa; margin-left: 12px; }
+
+  /* ── Page shell ── */
+  .page {
+    width: 297mm;
+    height: 210mm;
+    background: white;
+    margin: 48px auto 0;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+
+  /* ── Common header bar ── */
+  .hbar {
+    width: 100%; height: 14mm;
+    display: flex; align-items: center;
+    padding: 0 10mm;
+    flex-shrink: 0;
+  }
+  .hbar-title {
+    font-size: 15pt; font-weight: 800; color: white; line-height: 1;
+  }
+  .hbar-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
+    border-radius: 20px; padding: 3px 12px;
+    font-size: 9pt; color: white; font-weight: 600;
+  }
+
+  .body-area {
+    flex: 1; padding: 6mm 10mm 5mm;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Tag pill ── */
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 2px 9px; border-radius: 20px;
+    font-size: 8.5pt; font-weight: 700;
+    line-height: 1.5;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--grayL); border-radius: 6px;
+    padding: 4mm;
+  }
+
+  /* ── Bottom note bar ── */
+  .note-bar {
+    margin: auto 0 0;
+    border-radius: 5px; padding: 2.5mm 4mm;
+    font-size: 8pt; line-height: 1.5;
+  }
+
+  /* ────────────────────────────────────
+     PAGE 1 — COVER
+  ──────────────────────────────────── */
+  #p1 { background: linear-gradient(135deg, #1a1a2e 0%, #1b4332 100%); }
+  #p1 .deco-circle-1 {
+    position: absolute; width: 80mm; height: 80mm; border-radius: 50%;
+    background: rgba(82,183,136,.18); top: -25mm; right: -15mm;
+  }
+  #p1 .deco-circle-2 {
+    position: absolute; width: 55mm; height: 55mm; border-radius: 50%;
+    background: rgba(82,183,136,.1); bottom: -10mm; right: 30mm;
+  }
+  #p1 .cover-inner {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 14mm 20mm;
+  }
+  #p1 .badge-row {
+    background: var(--green); border-radius: 20px;
+    padding: 3px 16px; font-size: 9pt; font-weight: 700; color: white;
+    margin-bottom: 8mm;
+  }
+  #p1 .main-title {
+    font-size: 52pt; font-weight: 900; color: white;
+    text-align: center; line-height: 1.1; letter-spacing: -1px;
+  }
+  #p1 .sub-title {
+    font-size: 12pt; color: rgba(255,255,255,.6);
+    margin-top: 6mm; text-align: center; line-height: 1.6;
+  }
+  #p1 .cover-foot {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 9mm; background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9pt; color: white; font-weight: 500;
+  }
+
+  /* ────────────────────────────────────
+     PAGE 2 — 3 QUESTIONS
+  ──────────────────────────────────── */
+  .q-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm;
+    flex: 1;
+  }
+  .q-card {
+    border-radius: 8px; padding: 5mm;
+    border-left: 4px solid;
+    display: flex; flex-direction: column;
+  }
+  .q-num { font-size: 28pt; font-weight: 900; opacity: .15; line-height: 1; }
+  .q-q   { font-size: 12pt; font-weight: 800; margin: 2mm 0 4mm; color: var(--dark); }
+  .q-line { font-size: 9pt; color: var(--gray); margin-top: 2mm; line-height: 1.55; }
+  .q-line strong { display: block; font-weight: 700; color: var(--dark); }
+
+  /* ────────────────────────────────────
+     PAGE 3 — 5 STEPS
+  ──────────────────────────────────── */
+  .steps-row {
+    display: flex; align-items: flex-start; gap: 0; flex: 1;
+    margin-top: 5mm;
+  }
+  .step-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    text-align: center; position: relative;
+  }
+  .step-item:not(:last-child)::after {
+    content: '→';
+    position: absolute; right: -5mm; top: 8mm;
+    font-size: 18pt; color: var(--greenL); font-weight: 900;
+  }
+  .step-circle {
+    width: 16mm; height: 16mm; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18pt; font-weight: 900; color: white;
+    margin-bottom: 3mm;
+  }
+  .step-label { font-size: 11pt; font-weight: 800; color: var(--dark); }
+  .step-desc  { font-size: 8.5pt; color: var(--gray); margin-top: 2mm; line-height: 1.5; }
+  .step-card  {
+    background: var(--grayL); border-radius: 6px;
+    padding: 4mm 3mm; margin-top: 3mm; width: 100%;
+    font-size: 8pt; color: var(--gray); line-height: 1.5;
+  }
+
+  /* ────────────────────────────────────
+     PAGE 4 — 4 RELATIONS
+  ──────────────────────────────────── */
+  .rel-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; flex: 1;
+  }
+  .rel-card {
+    border-radius: 8px; padding: 5mm;
+    display: flex; flex-direction: column;
+  }
+  .rel-title { font-size: 12pt; font-weight: 800; color: var(--dark); margin-bottom: 2mm; }
+  .rel-sub   { font-size: 10pt; font-weight: 700; margin-bottom: 3mm; }
+  .rel-mini  {
+    background: rgba(255,255,255,.7); border-radius: 5px;
+    padding: 3mm; flex: 1; display: flex; align-items: center;
+    gap: 3mm;
+  }
+  .mini-block {
+    flex: 1; border-radius: 4px; padding: 2mm 3mm;
+    font-size: 8pt; font-weight: 700; text-align: center;
+  }
+  .rel-tip { font-size: 8pt; color: var(--gray); margin-top: 3mm; line-height: 1.5; }
+
+  /* ────────────────────────────────────
+     PAGE 5 — COVER TYPES
+  ──────────────────────────────────── */
+  .cover-types-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; flex: 1;
+  }
+  .ctype {
+    border-radius: 8px; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .ctype-mock {
+    flex: 1; position: relative;
+    display: flex; flex-direction: column;
+    padding: 4mm;
+  }
+  .ctype-label {
+    font-size: 8pt; font-weight: 700; text-align: center;
+    padding: 2mm; background: var(--grayL);
+    border-top: 1px solid var(--grayM);
+  }
+
+  /* ────────────────────────────────────
+     PAGE 6 — LAYOUT TYPES 1 & 2
+  ──────────────────────────────────── */
+  .layout-demo {
+    border: 2px solid var(--grayM); border-radius: 8px;
+    overflow: hidden;
+  }
+  .layout-hbar {
+    padding: 2.5mm 4mm;
+    font-size: 9pt; font-weight: 800; color: white;
+  }
+  .layout-body { padding: 3mm 4mm; }
+  .card-row { display: flex; gap: 3mm; }
+  .mini-card {
+    flex: 1; border-radius: 5px; padding: 3mm;
+    background: var(--grayL);
+  }
+  .mini-card-tag {
+    display: inline-block; border-radius: 3px;
+    padding: 1px 6px; font-size: 7.5pt; font-weight: 700; color: white;
+    margin-bottom: 2mm;
+  }
+  .mini-card-title { font-size: 9pt; font-weight: 700; margin-bottom: 1mm; }
+  .mini-card-body  { font-size: 7.5pt; color: var(--gray); line-height: 1.4; }
+
+  .flow-row { display: flex; gap: 0; align-items: center; }
+  .flow-step {
+    flex: 1; background: var(--grayL); border-radius: 5px;
+    padding: 3mm; text-align: center; position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '▶';
+    position: absolute; right: -4mm; top: 50%; transform: translateY(-50%);
+    font-size: 10pt; color: var(--greenL);
+  }
+  .flow-num {
+    width: 7mm; height: 7mm; border-radius: 50%;
+    margin: 0 auto 2mm;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9pt; font-weight: 800; color: white;
+  }
+  .flow-title { font-size: 8.5pt; font-weight: 700; }
+  .flow-body  { font-size: 7pt; color: var(--gray); margin-top: 1mm; line-height: 1.4; }
+
+  /* ────────────────────────────────────
+     PAGE 7 — LAYOUT TYPES 3 & 4
+  ──────────────────────────────────── */
+  .hier-top {
+    padding: 3mm 4mm; border-radius: 5px 5px 0 0;
+    font-size: 9pt; font-weight: 800; color: white; line-height: 1.4;
+  }
+  .hier-children { display: flex; gap: 3mm; padding: 3mm 0; }
+  .hier-child {
+    flex: 1; background: var(--grayL); border-radius: 5px;
+    padding: 3mm; border-top: 3px solid;
+  }
+  .hier-child-title { font-size: 9pt; font-weight: 700; margin-bottom: 1mm; }
+  .hier-child-body  { font-size: 7.5pt; color: var(--gray); line-height: 1.4; }
+
+  .compare-row { display: flex; border-radius: 5px; overflow: hidden; height: 52mm; }
+  .cmp-left  { flex: 1; padding: 4mm; display: flex; flex-direction: column; }
+  .cmp-right { flex: 1; padding: 4mm; display: flex; flex-direction: column; }
+  .cmp-tag   { font-size: 7.5pt; font-weight: 600; opacity: .7; margin-bottom: 2mm; }
+  .cmp-title { font-size: 16pt; font-weight: 900; color: white; line-height: 1.2; }
+  .cmp-items { margin-top: 3mm; }
+  .cmp-item  { font-size: 8pt; padding: 1mm 0; border-bottom: 1px solid rgba(255,255,255,.15); }
+
+  /* ────────────────────────────────────
+     PAGE 8 — DATA
+  ──────────────────────────────────── */
+  #p8 { background: var(--dark); }
+  .data-nums-row {
+    display: flex; gap: 0; margin: 5mm 0;
+  }
+  .data-num-col {
+    flex: 1; text-align: center; position: relative; padding: 0 4mm;
+  }
+  .data-num-col:not(:last-child)::after {
+    content: '';
+    position: absolute; right: 0; top: 10%; height: 80%;
+    width: 1px; background: rgba(255,255,255,.12);
+  }
+  .data-big   { font-size: 52pt; font-weight: 900; line-height: 1; display: inline-block; }
+  .data-unit  { font-size: 22pt; font-weight: 700; line-height: 1; vertical-align: super; }
+  .data-label { font-size: 9pt; color: rgba(255,255,255,.4); margin-top: 2mm; }
+
+  .rule-box {
+    border-radius: 6px; padding: 3mm 4mm;
+    font-size: 8.5pt; line-height: 1.6;
+  }
+
+  .bar-row { display: flex; align-items: center; gap: 3mm; margin: 1.5mm 0; }
+  .bar-label { font-size: 8.5pt; width: 22mm; text-align: right; color: rgba(255,255,255,.6); }
+  .bar-track { flex: 1; height: 4mm; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 2px; }
+  .bar-val   { font-size: 8.5pt; width: 10mm; font-weight: 700; }
+
+  /* ────────────────────────────────────
+     PAGE 9 — BEAUTIFICATION
+  ──────────────────────────────────── */
+  .beauty-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; flex: 1;
+  }
+  .beauty-card {
+    background: var(--grayL); border-radius: 7px; padding: 4mm;
+    display: flex; flex-direction: column;
+  }
+  .beauty-card-title {
+    font-size: 9.5pt; font-weight: 800; margin-bottom: 3mm;
+    padding-bottom: 2mm; border-bottom: 2px solid var(--grayM);
+  }
+  .swatch-row { display: flex; gap: 2mm; margin-bottom: 2mm; }
+  .swatch { height: 8mm; border-radius: 4px; flex: 1; }
+
+  .font-sample { padding: 1.5mm 0; border-bottom: 1px solid var(--grayM); display: flex; align-items: baseline; gap: 3mm; }
+  .font-note { font-size: 7.5pt; color: var(--gray); }
+
+  .deco-item { background: white; border-radius: 5px; padding: 2.5mm; margin-bottom: 2mm; }
+  .deco-preview { margin-bottom: 1.5mm; }
+  .deco-desc { font-size: 7.5pt; color: var(--gray); line-height: 1.4; }
+
+  /* ────────────────────────────────────
+     PAGE 10 — CHECKLIST
+  ──────────────────────────────────── */
+  #p10 { background: var(--dark); }
+  .check-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; flex: 1;
+  }
+  .check-col-title {
+    font-size: 10pt; font-weight: 800; color: white; margin-bottom: 3mm;
+    padding-bottom: 2mm; border-bottom: 1px solid rgba(255,255,255,.15);
+  }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 2mm;
+    padding: 2mm 0; border-bottom: 1px solid rgba(255,255,255,.08);
+    font-size: 8.5pt; color: rgba(255,255,255,.8); line-height: 1.4;
+  }
+  .check-icon { color: var(--greenL); font-weight: 900; flex-shrink: 0; }
+
+  .mistake-row { display: flex; gap: 3mm; margin-top: 4mm; }
+  .mistake-item {
+    flex: 1; background: rgba(230,57,70,.12);
+    border: 1px solid rgba(230,57,70,.3); border-radius: 5px;
+    padding: 3mm; font-size: 7.5pt; color: rgba(255,180,180,.9);
+    line-height: 1.4; text-align: center;
+  }
+  .mistake-x { font-size: 10pt; font-weight: 900; color: var(--red); display: block; margin-bottom: 1mm; }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    @page { size: A4 landscape; margin: 0; }
+    .print-bar { display: none !important; }
+    body { background: none; }
+    .page { margin: 0; width: 100%; height: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Print bar -->
+<div class="print-bar">
+  <div>
+    <strong>PPT制作保姆级教程</strong>
+    <span class="print-hint">共10页 · A4横版</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <span style="font-size:12px;color:#aaa">① 点击按钮 ② 选「目标打印机」为「另存为PDF」 ③ 点击保存</span>
+    <button class="print-btn" onclick="window.print()">🖨 打印 / 另存为 PDF</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 1 ═══════════════════════ -->
+<div class="page" id="p1">
+  <div class="deco-circle-1"></div>
+  <div class="deco-circle-2"></div>
+  <div class="cover-inner">
+    <div class="badge-row">保姆级图解教程 · 共10页</div>
+    <div class="main-title">PPT 制作<br>完全手册</div>
+    <div class="sub-title">
+      从零开始 · 信息排版 · 版式选择 · 配色美化<br>
+      封面逻辑 · 数据包装 · 美化底层逻辑 · 自检清单
+    </div>
+  </div>
+  <div class="cover-foot">共 10 页 · 覆盖封面 / 多内容 / 数据 / 美化全场景</div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 2 ═══════════════════════ -->
+<div class="page">
+  <div class="hbar" style="background:var(--dark)">
+    <div class="hbar-title">每一页动手前，先想3个问题</div>
+    <div class="hbar-badge">STEP 0</div>
+  </div>
+  <div class="body-area">
+    <div class="q-grid">
+
+      <div class="q-card" style="background:#f0fdf4;border-color:var(--green)">
+        <div class="q-num" style="color:var(--green)">Q1</div>
+        <div class="q-q">这页核心是什么？</div>
+        <div class="q-line">一句话说清楚这页要干什么：<br>
+          <strong>→ 一句结论</strong>
+          <strong>→ 一个流程</strong>
+          <strong>→ 几个并列方案</strong>
+          <strong>→ 几组数据</strong>
+          <strong>→ 一个对比</strong>
+          核心决定这页的「主角」是什么。
+        </div>
+      </div>
+
+      <div class="q-card" style="background:#fff7ed;border-color:var(--orange)">
+        <div class="q-num" style="color:var(--orange)">Q2</div>
+        <div class="q-q">信息量多还是少？</div>
+        <div class="q-line">字多和字少，完全不同的策略：<br>
+          <strong>→ 字多：分区、建结构</strong>
+          用标签压缩视觉密度，让读者眼睛有锚点
+          <strong>→ 字少：放大、留白</strong>
+          靠字本身撑气场，主标题放大到「觉得太大」才对
+        </div>
+      </div>
+
+      <div class="q-card" style="background:#eff6ff;border-color:var(--blue)">
+        <div class="q-num" style="color:var(--blue)">Q3</div>
+        <div class="q-q">信息之间什么关系？</div>
+        <div class="q-line">关系决定版式结构：<br>
+          <strong>→ 并列 → 等宽卡片网格</strong>
+          <strong>→ 递进/流程 → 横向箭头</strong>
+          <strong>→ 从属 → 大框套小框</strong>
+          <strong>→ 对比 → 左右各半+颜色区分</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="note-bar" style="background:var(--greenPale);border-left:4px solid var(--green);color:var(--green)">
+      <strong>核心原则：</strong>版式是信息关系的视觉翻译。先理清信息关系，再选版式——而不是先找好看的版式再填内容。
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 3 ═══════════════════════ -->
+<div class="page">
+  <div class="hbar" style="background:var(--green)">
+    <div class="hbar-title">做一页PPT的完整顺序 · 5步缺一不可</div>
+  </div>
+  <div class="body-area">
+    <div class="steps-row">
+
+      <div class="step-item">
+        <div class="step-circle" style="background:var(--green)">1</div>
+        <div class="step-label">写结论句</div>
+        <div class="step-desc">这页传递的<br>一句话核心</div>
+        <div class="step-card">问自己：如果观众只记住一件事，是哪件事？用一句话写下来，写不出来说明还没想清楚。</div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-circle" style="background:var(--greenL)">2</div>
+        <div class="step-label">理层级</div>
+        <div class="step-desc">哪个是主角<br>哪个是配角</div>
+        <div class="step-card">主角：最大最显眼。配角：次要信息。注释：最小最淡。三层层级就够，不要超过四层。</div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-circle" style="background:var(--blue)">3</div>
+        <div class="step-label">选结构</div>
+        <div class="step-desc">并列/递进/对比<br>选对应版式框架</div>
+        <div class="step-card">根据信息关系选版式，不要凭感觉乱排。选错了后面怎么美化都不对。</div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-circle" style="background:var(--orange)">4</div>
+        <div class="step-label">填内容</div>
+        <div class="step-desc">把文字图片<br>填进版式框架</div>
+        <div class="step-card">控制字数，正文每行不超过25字，说明文字能删则删，保留最有力的表达。</div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-circle" style="background:var(--red)">5</div>
+        <div class="step-label">配色美化</div>
+        <div class="step-desc">标签/颜色<br>间距/装饰</div>
+        <div class="step-card">加标签、统一颜色、调整间距、加入装饰元素。美化是加分，不是掩盖结构问题。</div>
+      </div>
+
+    </div>
+
+    <div class="note-bar" style="background:var(--grayL);color:var(--gray);border-left:4px solid var(--grayM)">
+      最常见的错误是跳过第1-3步，直接打开PPT开始排版。结果做完发现结构不对，全部重来。
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 4 ═══════════════════════ -->
+<div class="page">
+  <div class="hbar" style="background:var(--dark)">
+    <div class="hbar-title">4种信息关系 × 对应版式结构</div>
+    <div class="hbar-badge">选对版式 = 成功一半</div>
+  </div>
+  <div class="body-area">
+    <div class="rel-grid">
+
+      <!-- 并列 -->
+      <div class="rel-card" style="background:var(--greenPale)">
+        <div style="display:flex;align-items:center;gap:3mm;margin-bottom:2mm">
+          <div style="width:3mm;height:3mm;border-radius:50%;background:var(--green)"></div>
+          <div class="rel-title">并列关系</div>
+          <div class="rel-sub" style="color:var(--green);margin-left:auto">→ 等宽卡片网格</div>
+        </div>
+        <div class="rel-mini">
+          <div class="mini-block" style="background:var(--greenPale);color:var(--green)">方案A</div>
+          <div class="mini-block" style="background:var(--greenPale);color:var(--green)">方案B</div>
+          <div class="mini-block" style="background:var(--greenPale);color:var(--green)">方案C</div>
+        </div>
+        <div class="rel-tip">适用：3-4个平等并列的方案/特点/模块。规则：每张卡片内部结构必须完全一致。</div>
+      </div>
+
+      <!-- 递进 -->
+      <div class="rel-card" style="background:#fff7ed">
+        <div style="display:flex;align-items:center;gap:3mm;margin-bottom:2mm">
+          <div style="width:3mm;height:3mm;border-radius:50%;background:var(--orange)"></div>
+          <div class="rel-title">递进/流程</div>
+          <div class="rel-sub" style="color:var(--orange);margin-left:auto">→ 横向箭头</div>
+        </div>
+        <div class="rel-mini" style="align-items:center">
+          <div class="mini-block" style="background:#fff3e0;color:var(--orange)">Step 1</div>
+          <div style="font-size:14pt;font-weight:900;color:var(--orange)">→</div>
+          <div class="mini-block" style="background:#fff3e0;color:var(--orange)">Step 2</div>
+          <div style="font-size:14pt;font-weight:900;color:var(--orange)">→</div>
+          <div class="mini-block" style="background:#fff3e0;color:var(--orange)">Step 3</div>
+        </div>
+        <div class="rel-tip">适用：有先后顺序的执行步骤。规则：步骤数3-5个，编号要足够大，超过5个就拆页。</div>
+      </div>
+
+      <!-- 从属 -->
+      <div class="rel-card" style="background:#eff6ff">
+        <div style="display:flex;align-items:center;gap:3mm;margin-bottom:2mm">
+          <div style="width:3mm;height:3mm;border-radius:50%;background:var(--blue)"></div>
+          <div class="rel-title">从属关系</div>
+          <div class="rel-sub" style="color:var(--blue);margin-left:auto">→ 大框套小框</div>
+        </div>
+        <div class="rel-mini" style="flex-direction:column;gap:2mm">
+          <div style="background:var(--dark);color:white;border-radius:4px;padding:2mm 3mm;font-size:8.5pt;font-weight:700">总概念 / 主策略</div>
+          <div style="display:flex;gap:2mm">
+            <div class="mini-block" style="background:#dbeafe;color:var(--blue)">支撑点A</div>
+            <div class="mini-block" style="background:#dbeafe;color:var(--blue)">支撑点B</div>
+            <div class="mini-block" style="background:#dbeafe;color:var(--blue)">支撑点C</div>
+          </div>
+        </div>
+        <div class="rel-tip">适用：一个总策略+若干支撑点。规则：总主张颜色深，子项颜色浅，深浅对比传达从属关系。</div>
+      </div>
+
+      <!-- 对比 -->
+      <div class="rel-card" style="background:#fde8ea">
+        <div style="display:flex;align-items:center;gap:3mm;margin-bottom:2mm">
+          <div style="width:3mm;height:3mm;border-radius:50%;background:var(--red)"></div>
+          <div class="rel-title">对比关系</div>
+          <div class="rel-sub" style="color:var(--red);margin-left:auto">→ 左右各半</div>
+        </div>
+        <div class="rel-mini" style="gap:2mm">
+          <div style="flex:1;background:var(--dark);color:white;border-radius:4px;padding:3mm">
+            <div style="font-size:7pt;opacity:.5;margin-bottom:1mm">旧做法</div>
+            <div style="font-size:10pt;font-weight:700">泛泛而谈</div>
+          </div>
+          <div style="font-size:14pt;font-weight:900;color:var(--red)">VS</div>
+          <div style="flex:1;background:var(--green);color:white;border-radius:4px;padding:3mm">
+            <div style="font-size:7pt;opacity:.7;margin-bottom:1mm">新做法</div>
+            <div style="font-size:10pt;font-weight:700">具体落点</div>
+          </div>
+        </div>
+        <div class="rel-tip">适用：新旧对比/好坏对比/AB方案。规则：两侧颜色差异要够大，信息量保持两侧对称。</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 5 ═══════════════════════ -->
+<div class="page">
+  <div class="hbar" style="background:var(--green)">
+    <div class="hbar-title">封面的3种构成逻辑</div>
+    <div class="hbar-badge">封面任务：建立调性 + 传递核心信息</div>
+  </div>
+  <div class="body-area">
+    <div class="cover-types-row">
+
+      <!-- Type A -->
+      <div class="ctype" style="border:2px solid var(--grayM)">
+        <div class="ctype-mock" style="background:linear-gradient(135deg,#2c5f2d,#1a3a1a);flex:1">
+          <div style="font-size:8pt;color:rgba(255,255,255,.5);text-align:center;margin-bottom:3mm">小红书 · 3.8活动</div>
+          <div style="font-size:26pt;font-weight:900;color:white;text-align:center;line-height:1.1">好心情<br>小会</div>
+          <div style="font-size:9pt;color:rgba(255,255,255,.6);text-align:center;margin-top:4mm">2026年招商通案</div>
+          <div style="margin:3mm auto 0;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:2px 10px;font-size:8pt;color:white;text-align:center;width:fit-content">小红书商业化</div>
+        </div>
+        <div class="ctype-label">
+          <strong style="color:var(--green)">类型A · 全出血大图+字居中</strong><br>
+          <span style="font-size:7pt;color:var(--gray)">情绪调性型封面，主副标题字号差≥3倍</span>
+        </div>
+      </div>
+
+      <!-- Type B -->
+      <div class="ctype" style="border:2px solid var(--grayM)">
+        <div class="ctype-mock" style="flex-direction:row;padding:0;flex:1">
+          <div style="width:52%;padding:4mm;background:white;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:7.5pt;color:var(--green);font-weight:700;margin-bottom:2mm">Phase 2 · 2026</div>
+            <div style="font-size:20pt;font-weight:900;color:var(--dark);line-height:1.15">100片<br>身边绿洲</div>
+            <div style="font-size:8pt;color:var(--gray);margin-top:3mm;line-height:1.5">打造身边1公里的绿洲社区，联合万千女性友好品牌，发起全新行动</div>
+          </div>
+          <div style="flex:1;background:linear-gradient(135deg,var(--green),var(--greenL));display:flex;align-items:center;justify-content:center">
+            <div style="width:22mm;height:22mm;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:8pt;color:rgba(255,255,255,.6)">品牌图</div>
+          </div>
+        </div>
+        <div class="ctype-label">
+          <strong style="color:var(--green)">类型B · 左字右图分区</strong><br>
+          <span style="font-size:7pt;color:var(--gray)">信息型封面，文字区55% / 图片区45%</span>
+        </div>
+      </div>
+
+      <!-- Type C -->
+      <div class="ctype" style="border:2px solid var(--grayM)">
+        <div class="ctype-mock" style="background:var(--dark);flex:1;justify-content:flex-end">
+          <div style="background:var(--green);color:white;border-radius:3px;padding:2px 8px;font-size:8pt;font-weight:700;display:inline-block;margin-bottom:3mm">Chapter 2 · 活动策略</div>
+          <div style="font-size:26pt;font-weight:900;color:white;line-height:1.1">「身边<br><span style="color:var(--greenL)">绿洲</span>」</div>
+          <div style="font-size:8.5pt;color:rgba(255,255,255,.4);margin-top:3mm">从「理念」到「行动」</div>
+        </div>
+        <div class="ctype-label">
+          <strong style="color:var(--green)">类型C · 深色底+大字章节页</strong><br>
+          <span style="font-size:7pt;color:var(--gray)">高亮色只用在1-2个核心词上</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="note-bar" style="background:var(--grayL);border-left:4px solid var(--grayM);color:var(--gray)">
+      <strong style="color:var(--dark)">字号黄金比例：</strong>主标题 : 章节标题 : 副标题 ≈ 5 : 2 : 1，层级差越大，视觉冲击力越强。
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 6 ═══════════════════════ -->
+<div class="page">
+  <div class="hbar" style="background:var(--dark)">
+    <div class="hbar-title">版式1 等宽卡片网格 · 版式2 横向流程箭头</div>
+  </div>
+  <div class="body-area" style="gap:4mm">
+
+    <!-- Layout 1 -->
+    <div class="layout-demo" style="flex:1">
+      <div class="layout-hbar" style="background:var(--dark);display:flex;align-items:center;gap:3mm">
+        <span class="tag" style="background:var(--green);color:white">版式1 · 并列关系</span>
+        <span style="font-size:9pt;font-weight:800">（*STEP 2）开放品牌门店友好合作点 共建身边绿洲</span>
+      </div>
+      <div class="layout-body">
+        <div class="card-row">
+          <div class="mini-card">
+            <div class="mini-card-tag" style="background:var(--green)">食品品类</div>
+            <div class="mini-card-title">生理期热饮自助点</div>
+            <div class="mini-card-body">为门店设置专属热饮区，提供女性经期专属产品，传递品牌温度与关怀</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-tag" style="background:var(--orange)">母婴品类</div>
+            <div class="mini-card-title">育儿族物资补给站</div>
+            <div class="mini-card-body">设置婴儿车停放区、哺乳角及育儿必备物资补给，成为妈妈们的贴心驿站</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-tag" style="background:var(--blue)">家居品类</div>
+            <div class="mini-card-title">卸下高跟鞋休息区</div>
+            <div class="mini-card-body">提供专属休憩角落，让都市女性随时找到放松身心的场所</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-tag" style="background:var(--red)">美妆品类</div>
+            <div class="mini-card-title">一分钟焕活补妆室</div>
+            <div class="mini-card-body">提供镜子、补妆台及品牌体验，让女性随时保持最佳状态</div>
+          </div>
+        </div>
+        <div style="font-size:7.5pt;color:var(--green);background:var(--greenPale);padding:2mm 3mm;border-radius:4px;margin-top:2mm">
+          规则：每张卡片内部结构必须完全一致（标签→标题→说明）。结构统一是网格版式的生命线。
+        </div>
+      </div>
+    </div>
+
+    <!-- Layout 2 -->
+    <div class="layout-demo" style="flex:1">
+      <div class="layout-hbar" style="background:var(--dark);display:flex;align-items:center;gap:3mm">
+        <span class="tag" style="background:var(--orange);color:white">版式2 · 递进关系</span>
+        <span style="font-size:9pt;font-weight:800">（*STEP 1-4）招募→公约→扩散→地图</span>
+      </div>
+      <div class="layout-body">
+        <div class="flow-row" style="gap:5mm">
+          <div class="flow-step">
+            <div class="flow-num" style="background:var(--green)">1</div>
+            <div class="flow-title">招募友好商家</div>
+            <div class="flow-body">全品类开放线上报名，发布话题笔记展示绿洲角</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="background:var(--greenL)">2</div>
+            <div class="flow-title">官方号召共建</div>
+            <div class="flow-body">发布共建公约，邀请女性、男性、城市门店加入</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="background:var(--blue)">3</div>
+            <div class="flow-title">KOL领衔发声</div>
+            <div class="flow-body">联动女性主义明星KOL担任联合发起人</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="background:var(--orange)">4</div>
+            <div class="flow-title">绿洲地图解锁</div>
+            <div class="flow-body">H5上线友好绿洲地图，全站推流解锁附近绿洲</div>
+          </div>
+        </div>
+        <div style="font-size:7.5pt;color:#e07b00;background:#fff3e0;padding:2mm 3mm;border-radius:4px;margin-top:2mm">
+          规则：步骤编号是视觉锚点，要足够大；步骤数3-5个，超过5个就拆页。
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 7 ═══════════════════════ -->
+<div class="page">
+  <div class="hbar" style="background:var(--dark)">
+    <div class="hbar-title">版式3 主从层级 · 版式4 左右对比</div>
+  </div>
+  <div class="body-area" style="gap:4mm">
+
+    <!-- Layout 3 -->
+    <div class="layout-demo" style="flex:1">
+      <div class="layout-hbar" style="background:var(--dark);display:flex;align-items:center;gap:3mm">
+        <span class="tag" style="background:var(--blue);color:white">版式3 · 从属关系</span>
+        <span style="font-size:9pt;font-weight:800">新主张 · 构建出女性生活半径内的具像化女性友好落点</span>
+      </div>
+      <div class="layout-body">
+        <div class="hier-top" style="background:var(--dark)">
+          构建出女性生活半径内的，具像化的女性友好落点，进而成为由点连接成面的，女性友好的社会景观
+        </div>
+        <div class="hier-children">
+          <div class="hier-child" style="border-color:var(--greenL)">
+            <div class="hier-child-title">平台角色升维</div>
+            <div class="hier-child-body">从「倡导她价值」到「共建女性友好社会」，告别单向度宣言，将共识转化为可触摸的现实</div>
+          </div>
+          <div class="hier-child" style="border-color:var(--orange)">
+            <div class="hier-child-title">视角升维</div>
+            <div class="hier-child-body">从「她」到「我们」，女性友好不是女性独角戏，而是更多元视角的社会议题</div>
+          </div>
+          <div class="hier-child" style="border-color:var(--blueL)">
+            <div class="hier-child-title">影响落地</div>
+            <div class="hier-child-body">从「理念」到「行动」，真正的治愈是用行动建构触手可及的女性友好生活空间</div>
+          </div>
+        </div>
+        <div style="font-size:7.5pt;color:var(--blue);background:#dbeafe;padding:2mm 3mm;border-radius:4px;">
+          规则：总主张用深色背景，子项用浅色，颜色深浅自然传达从属关系。
+        </div>
+      </div>
+    </div>
+
+    <!-- Layout 4 -->
+    <div class="layout-demo" style="flex:1">
+      <div class="layout-hbar" style="background:var(--dark);display:flex;align-items:center;gap:3mm">
+        <span class="tag" style="background:var(--red);color:white">版式4 · 对比关系</span>
+        <span style="font-size:9pt;font-weight:800">新洞察 · 从「主义」到「具体女性议题」的转变</span>
+      </div>
+      <div class="layout-body">
+        <div class="compare-row" style="height:44mm">
+          <div class="cmp-left" style="background:var(--dark)">
+            <div class="cmp-tag" style="color:rgba(255,255,255,.5)">过去的做法</div>
+            <div class="cmp-title" style="font-size:14pt">泛泛的<br>女性宣言</div>
+            <div class="cmp-items">
+              <div class="cmp-item" style="color:#aaa">「主义」式口号，宏大叙事</div>
+              <div class="cmp-item" style="color:#aaa">距离女性日常生活很远</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;background:var(--grayM);padding:0 2mm">
+            <div style="background:white;border-radius:50%;width:8mm;height:8mm;display:flex;align-items:center;justify-content:center;font-size:8pt;font-weight:900;color:var(--red)">VS</div>
+          </div>
+          <div class="cmp-right" style="background:var(--green)">
+            <div class="cmp-tag" style="color:var(--greenPale)">2026新方向</div>
+            <div class="cmp-title" style="font-size:14pt">具体的<br>友好落点</div>
+            <div class="cmp-items">
+              <div class="cmp-item" style="color:var(--greenPale)">具体场景解决方案，可感知</div>
+              <div class="cmp-item" style="color:var(--greenPale)">从日常细微生活出发</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:7.5pt;color:var(--red);background:#fde8ea;padding:2mm 3mm;border-radius:4px;margin-top:2mm">
+          规则：两侧颜色差异要足够大，信息量保持两侧对称，中间VS标签要突出。
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 8 ═══════════════════════ -->
+<div class="page" id="p8">
+  <div class="hbar" style="background:rgba(82,183,136,.2)">
+    <div class="hbar-title" style="color:var(--greenL)">数据的包装逻辑 · 让数字先被看见，再被理解</div>
+  </div>
+  <div class="body-area">
+
+    <div class="data-nums-row">
+      <div class="data-num-col">
+        <div style="display:inline">
+          <span class="data-big" style="color:var(--greenL)">12.3</span><span class="data-unit" style="color:var(--greenL)">亿+</span>
+        </div>
+        <div class="data-label">项目总曝光</div>
+      </div>
+      <div class="data-num-col">
+        <div style="display:inline">
+          <span class="data-big" style="color:var(--yellow)">5.8</span><span class="data-unit" style="color:var(--yellow)">亿+</span>
+        </div>
+        <div class="data-label">话题曝光</div>
+      </div>
+      <div class="data-num-col">
+        <div style="display:inline">
+          <span class="data-big" style="color:var(--orange)">20</span><span class="data-unit" style="color:var(--orange)">万+</span>
+        </div>
+        <div class="data-label">用户讨论笔记</div>
+      </div>
+    </div>
+
+    <div class="rule-box" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)">
+      <div style="font-size:9pt;color:rgba(255,255,255,.6);line-height:1.7">
+        <strong style="color:var(--greenL)">层级规则：</strong>数字本体字号最大（52pt+）→ 单位缩小为数字的50%（约22pt）→ 说明文字最小最淡（9pt）<br>
+        <strong style="color:var(--greenL)">口诀：</strong>数字大到离谱，单位跟着缩，说明文字退场。观众先被数字震撼，再去理解是什么数字。
+      </div>
+    </div>
+
+    <div style="margin-top:4mm">
+      <div style="font-size:10pt;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:3mm">进度条版式（适合多组占比/百分比数据对比）</div>
+      <div class="bar-row">
+        <div class="bar-label">城市设施问题</div>
+        <div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--greenL)"></div></div>
+        <div class="bar-val" style="color:var(--greenL)">80%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">安全感缺失</div>
+        <div class="bar-track"><div class="bar-fill" style="width:33%;background:var(--orange)"></div></div>
+        <div class="bar-val" style="color:var(--orange)">1/3</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">公共场所不适</div>
+        <div class="bar-track"><div class="bar-fill" style="width:53%;background:var(--blueL)"></div></div>
+        <div class="bar-val" style="color:var(--blueL)">53.4%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 9 ═══════════════════════ -->
+<div class="page">
+  <div class="hbar" style="background:var(--green)">
+    <div class="hbar-title">美化的底层逻辑 · 先把结构做对，再谈美化</div>
+  </div>
+  <div class="body-area">
+    <div class="beauty-grid">
+
+      <!-- 配色 -->
+      <div class="beauty-card">
+        <div class="beauty-card-title">🎨 配色：只用3个角色</div>
+        <div class="swatch-row">
+          <div class="swatch" style="background:var(--green)"></div>
+          <div class="swatch" style="background:#4b5563"></div>
+          <div class="swatch" style="background:var(--orange)"></div>
+        </div>
+        <div style="font-size:7.5pt;color:var(--gray);line-height:1.6">
+          <strong style="display:block;color:var(--dark)">① 主色（品牌色）</strong>用在标签/强调/分割线
+          <strong style="display:block;color:var(--dark);margin-top:2mm">② 中性色</strong>黑灰白，占画面70%以上
+          <strong style="display:block;color:var(--dark);margin-top:2mm">③ 点缀色</strong>最多1-2个，面积≤10%
+        </div>
+        <div style="font-size:7.5pt;color:var(--red);margin-top:2mm;background:#fde8ea;padding:2mm;border-radius:4px">
+          ⚠ 一页用了5种颜色 = 最常见的错误
+        </div>
+      </div>
+
+      <!-- 字体 -->
+      <div class="beauty-card">
+        <div class="beauty-card-title">✍ 字体层级：靠字重+字号建立层级</div>
+        <div class="font-sample">
+          <span style="font-size:22pt;font-weight:900;color:var(--dark)">主标题</span>
+          <span class="font-note">44pt · 900字重</span>
+        </div>
+        <div class="font-sample">
+          <span style="font-size:15pt;font-weight:700;color:var(--dark)">章节标题</span>
+          <span class="font-note">24pt · 700字重</span>
+        </div>
+        <div class="font-sample">
+          <span style="font-size:11pt;font-weight:600;color:var(--dark)">内容小标题</span>
+          <span class="font-note">16pt · 600字重</span>
+        </div>
+        <div class="font-sample">
+          <span style="font-size:9pt;color:var(--gray)">正文说明文字 Regular灰色</span>
+          <span class="font-note">12pt · Regular</span>
+        </div>
+        <div style="font-size:7.5pt;color:var(--green);margin-top:2mm">✓ 全套PPT只用1种中文字体就够了</div>
+      </div>
+
+      <!-- 装饰元素 -->
+      <div class="beauty-card">
+        <div class="beauty-card-title">✨ 5种快速提升质感的装饰</div>
+        <div class="deco-item">
+          <div class="deco-preview">
+            <span class="tag" style="background:var(--green);color:white">Step 1</span>
+            <span class="tag" style="background:transparent;border:2px solid var(--green);color:var(--green);margin-left:2mm">食品品类</span>
+          </div>
+          <div class="deco-desc">① 圆角标签：为内容块贴视觉锚点标签</div>
+        </div>
+        <div class="deco-item">
+          <div class="deco-preview" style="border-left:3px solid var(--orange);padding-left:3mm">
+            <span style="font-size:9pt;font-weight:700">重点内容</span>
+          </div>
+          <div class="deco-desc">② 左侧竖线：区分不同信息板块</div>
+        </div>
+        <div class="deco-item">
+          <div class="deco-preview" style="font-size:14pt;font-weight:900;color:var(--green)">「关键词」</div>
+          <div class="deco-desc">③ 引号装饰：字少时增加造型感</div>
+        </div>
+        <div class="deco-item">
+          <div class="deco-preview" style="display:flex;gap:2mm;align-items:center">
+            <div style="width:6mm;height:6mm;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:9pt;font-weight:800">1</div>
+            <span style="font-size:9pt;font-weight:700">编号圆圈强调顺序</span>
+          </div>
+          <div class="deco-desc">④ 编号圆圈：比纯文字列表更有视觉重量</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="note-bar" style="background:var(--grayL);border-left:4px solid var(--grayM);color:var(--gray)">
+      <strong style="color:var(--dark)">间距与对齐：</strong>四边留出统一边距（约10%页面宽），所有元素严格对齐，卡片间距均等，一页内只用一种对齐方式（左对齐或居中，不混用）。
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ PAGE 10 ═══════════════════════ -->
+<div class="page" id="p10">
+  <div class="hbar" style="background:var(--green)">
+    <div class="hbar-title">完成每页PPT的自检清单 · 做完对照检查再提交</div>
+  </div>
+  <div class="body-area">
+    <div class="check-grid">
+
+      <div>
+        <div class="check-col-title">🏗 结构层面</div>
+        <div class="check-item"><span class="check-icon">✓</span>这页有且只有一个核心结论（一句话可概括）</div>
+        <div class="check-item"><span class="check-icon">✓</span>标题已写出核心结论，而不是笼统标题</div>
+        <div class="check-item"><span class="check-icon">✓</span>信息层级清晰（主角/配角/注释三层足够）</div>
+        <div class="check-item"><span class="check-icon">✓</span>选的版式结构符合信息之间的逻辑关系</div>
+        <div class="check-item"><span class="check-icon">✓</span>字多的内容已用标签/分区处理，非大段落</div>
+      </div>
+
+      <div>
+        <div class="check-col-title">🎨 视觉层面</div>
+        <div class="check-item"><span class="check-icon">✓</span>全页颜色不超过3种（主色+中性色+1个点缀色）</div>
+        <div class="check-item"><span class="check-icon">✓</span>主标题字号是正文字号的3-5倍以上</div>
+        <div class="check-item"><span class="check-icon">✓</span>全页只用一种对齐方式，不混用</div>
+        <div class="check-item"><span class="check-icon">✓</span>四边有统一边距，内容没有顶格</div>
+        <div class="check-item"><span class="check-icon">✓</span>卡片/模块之间间距均等，图片比例未被拉伸</div>
+      </div>
+
+    </div>
+
+    <!-- Speed reference -->
+    <div style="margin-top:3mm">
+      <div style="font-size:9.5pt;font-weight:800;color:white;margin-bottom:2mm">⚡ 速查：场景 → 直接选这个版式</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2.5mm">
+        <div style="background:rgba(82,183,136,.15);border:1px solid rgba(82,183,136,.3);border-radius:5px;padding:2.5mm">
+          <div style="font-size:7.5pt;color:var(--greenL);font-weight:700">3-4个并列方案</div>
+          <div style="font-size:8.5pt;font-weight:700;color:white;margin-top:1mm">→ 等宽卡片网格</div>
+        </div>
+        <div style="background:rgba(244,162,97,.15);border:1px solid rgba(244,162,97,.3);border-radius:5px;padding:2.5mm">
+          <div style="font-size:7.5pt;color:var(--orange);font-weight:700">有先后顺序的步骤</div>
+          <div style="font-size:8.5pt;font-weight:700;color:white;margin-top:1mm">→ 横向流程+箭头</div>
+        </div>
+        <div style="background:rgba(69,123,157,.15);border:1px solid rgba(69,123,157,.3);border-radius:5px;padding:2.5mm">
+          <div style="font-size:7.5pt;color:var(--blueL);font-weight:700">总策略+3个支撑</div>
+          <div style="font-size:8.5pt;font-weight:700;color:white;margin-top:1mm">→ 大框套小框</div>
+        </div>
+        <div style="background:rgba(230,57,70,.15);border:1px solid rgba(230,57,70,.3);border-radius:5px;padding:2.5mm">
+          <div style="font-size:7.5pt;color:#ff9999;font-weight:700">新旧/好坏对比</div>
+          <div style="font-size:8.5pt;font-weight:700;color:white;margin-top:1mm">→ 左右各半+颜色</div>
+        </div>
+        <div style="background:rgba(82,183,136,.15);border:1px solid rgba(82,183,136,.3);border-radius:5px;padding:2.5mm">
+          <div style="font-size:7.5pt;color:var(--greenL);font-weight:700">3组数据结果</div>
+          <div style="font-size:8.5pt;font-weight:700;color:white;margin-top:1mm">→ 深色底+超大数字</div>
+        </div>
+        <div style="background:rgba(255,209,102,.15);border:1px solid rgba(255,209,102,.3);border-radius:5px;padding:2.5mm">
+          <div style="font-size:7.5pt;color:var(--yellow);font-weight:700">情绪型封面/章节页</div>
+          <div style="font-size:8.5pt;font-weight:700;color:white;margin-top:1mm">→ 全出血大图+字居中</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mistake-row">
+      <div class="mistake-item"><span class="mistake-x">✕</span>一页塞太多内容</div>
+      <div class="mistake-item"><span class="mistake-x">✕</span>字号大小都差不多</div>
+      <div class="mistake-item"><span class="mistake-x">✕</span>颜色用了5种以上</div>
+      <div class="mistake-item"><span class="mistake-x">✕</span>对齐随意没做好</div>
+      <div class="mistake-item"><span class="mistake-x">✕</span>先找模板再填内容</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
